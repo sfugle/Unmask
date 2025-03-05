@@ -26,12 +26,13 @@ struct FUMParentChildPair
 UENUM()
 enum EUMAnimEditor_MatSlot
 {
-	LEG_L = 0,
-	ARM_L,
+	TORSO = 0,
+	LEG_L, 
 	LEG_R,
+	ARM_L,
 	ARM_R,
-	HEAD,
-	TORSO
+	HAND_L,
+	HAND_R,
 };
 
 UCLASS(BlueprintType)
@@ -47,6 +48,10 @@ protected:
 	TMap<FName, UUMJointGroup*> AllGroups;
 	UPROPERTY()
 	TArray<UMaterialInstanceDynamic*> DynMatInsts;
+	UPROPERTY()
+	TArray<FName> VisibleGroups;
+	UPROPERTY()
+	UUMJointGroup* SelectedGroup;
 
 public:
 	UUMAnimationRecorder();
@@ -57,7 +62,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	UUMJointGroup* GetGroupWithBone(FName Bone);
 	UFUNCTION(BlueprintCallable)
-	void SelectGroup(UUMJointGroup* Group);
+	void SelectGroup(UUMJointGroup* Group, bool bForce);
 	FString AllGroupsToString();
 	UFUNCTION(BlueprintCallable)
 	void PrintAllGroups();
