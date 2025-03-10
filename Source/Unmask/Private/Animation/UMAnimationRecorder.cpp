@@ -4,22 +4,26 @@
 #include "Animation/UMAnimationRecorder.h"
 #include "Animation/Skeleton.h"
 #include "Animation/AnimData/UMSequenceStructs.h"
-#include "Animation/AnimData/UMJointClasses.h"
+#include "Animation/AnimData/UMJointGroup.h"
 
 class UUMSequenceHelper;
+class UUMAnimationRecorder;
 
 UUMAnimationRecorder::UUMAnimationRecorder()
 {
 	this->SkeletalMeshComponent = nullptr;
 	RootGroup = NewObject<UUMJointGroup>();
 	RootGroup->Name = "Root";
+	RootGroup->Depth = 0;
 	SelectedGroup = RootGroup;
+	bGenerated = false;
 }
 
-UUMAnimationRecorder* UUMAnimationRecorder::GetNewAnimationRecorder()
+UUMAnimationRecorder* UUMAnimationRecorder::GetAnimationRecorder()
 {
 	return NewObject<UUMAnimationRecorder>();
 }
+
 
 void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkeletalMeshComponent)
 {
@@ -36,8 +40,6 @@ void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkele
 	{
 		SkeletalMeshComponent->SetMaterial(i, DynMatInsts[i]);
 	}
-
-
 	
 	this->RootGroup->Name = FName("body");
 	RootGroup->AddBones({"root", "pelvis", "spine_01", "spine_02", "spine_03", "spine_04", "spine_05", "clavicle_l", "neck_01", "neck_02", "head",
@@ -135,6 +137,7 @@ void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkele
 	{
 		VisibleGroups.Add(Pair.Key);
 	}
+	GeneratePoseData();
 }
 
 UUMJointGroup* UUMAnimationRecorder::GetGroupWithBone(FName BoneName)
@@ -226,7 +229,8 @@ void UUMAnimationRecorder::SelectGroup(UUMJointGroup* Group, bool bForce=false)
 		DynMatInsts[i]->SetScalarParameterValue("bVisible", 0.0);
 		DynMatInsts[i]->SetScalarParameterValue("bHighlighted", 0.0);
 	}
-	
+	GeneratePoseData();
+	PrintAllGroups();
 }
 
 FString UUMAnimationRecorder::AllGroupsToString()
@@ -241,7 +245,7 @@ FString UUMAnimationRecorder::AllGroupsToString()
 		for (int i = 0; i < Group->Joints.Num(); i++)
 		{
 			auto& Joint = Group->Joints[i];
-			StringBuilder->Append(*Joint.Name.ToString());
+			StringBuilder->Append(*Joint.ToString());
 			if (i < Group->Joints.Num() - 1)
 			{
 				StringBuilder->Append(TEXT(", "));
@@ -295,4 +299,90 @@ void UUMAnimationRecorder::LoadTimelines(TMap<FName, FUMJointTimeline> Timelines
 			if (Exit) break;
 		}
 	}
+}
+
+TMap<FName, int> UUMAnimationRecorder::GetControlIndexMap()
+{
+	return IndexMap;
+}
+
+TArray<FRotatorRange> UUMAnimationRecorder::GetControlRanges()
+{
+	return RotatorRanges;
+}
+
+int UUMAnimationRecorder::GetControlIndex(const FName Name)
+{
+	if(!bGenerated)
+	{
+		GeneratePoseData();
+	}
+	return IndexMap.FindChecked(Name);
+}
+
+FRotatorRange UUMAnimationRecorder::GetControlRange(FName Name)
+{
+	if(!bGenerated)
+	{
+		GeneratePoseData();
+	}
+	const int Index = IndexMap.FindChecked(Name);
+	return RotatorRanges[Index];
+}
+
+void UUMAnimationRecorder::UpdateControlValue(TArray<FUMControlTransform>& PoseDataRef, int Index, FUMControlTransform NewControlTransform)
+{
+	if(!bGenerated)
+	{
+		GeneratePoseData();
+	}
+	ensure(Index < PoseDataRef.Num() && Index < RotatorRanges.Num());
+	check(PoseDataRef[Index].Name.IsEqual(NewControlTransform.Name));
+	if(RotatorRanges[Index].Within(NewControlTransform.Transform.Rotator()))
+	{
+		PoseDataRef[Index] = NewControlTransform;
+	}
+}
+
+void UUMAnimationRecorder::GeneratePoseData()
+{
+	TArray<TPair<FName, FUMJoint>> AllJointPairs;
+	TArray<FUMControlTransform> PoseData;
+	for (auto Tuple : AllGroups)
+	{
+		auto Group = Tuple.Value;
+		for(auto Joint : Group->Joints)
+		{
+			AllJointPairs.Add({Tuple.Key, Joint});
+		}
+	}
+	AllJointPairs.Sort(
+		[](const auto& Pair1, const auto& Pair2) -> bool
+			{return Pair1.Value.Depth < Pair2.Value.Depth;}
+	);
+	IndexMap.Reserve(AllJointPairs.Num());
+	for (int i = 0; i < AllJointPairs.Num(); i++)
+	{
+		IndexMap.Add(AllJointPairs[i].Key, i);
+	}
+	for (auto& JointPair : AllJointPairs)
+	{
+		FUMControlRange& Ctrl = JointPair.Value.Control;
+		FName CtrlName = Ctrl.Name;
+		FRotatorRange RangeVal = FRotatorRange();
+		if(Ctrl.RotatorRange.Min == FRotator::ZeroRotator && Ctrl.RotatorRange.Max == FRotator::ZeroRotator)
+		{
+			FRotatorRange* RangePtr = DefaultControls.Find(CtrlName);
+			if(RangePtr)
+			{
+				RangeVal = *RangePtr;
+			}
+		} else {
+			RangeVal = Ctrl.RotatorRange;
+		}
+		PoseData.Add(FUMControlTransform(CtrlName));
+		RotatorRanges.Add(RangeVal);
+	}
+	bGenerated = true;
+	InitialPoseData = PoseData;
 }

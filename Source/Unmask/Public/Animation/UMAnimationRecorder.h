@@ -14,6 +14,7 @@
  * 
  */
 
+class UUMPoseData;
 template<typename... Types>  struct TTuple;
 
 USTRUCT()
@@ -35,41 +36,99 @@ enum EUMAnimEditor_MatSlot
 	HAND_R,
 };
 
-UCLASS(BlueprintType)
+UCLASS(Blueprintable, BlueprintType)
 class UNMASK_API UUMAnimationRecorder : public UObject
 {
 	GENERATED_BODY()
 protected:
 	UPROPERTY()
 	USkeletalMeshComponent* SkeletalMeshComponent;
+	
 	UPROPERTY()
 	UUMJointGroup* RootGroup;
+	
 	UPROPERTY()
 	TMap<FName, UUMJointGroup*> AllGroups;
+	
 	UPROPERTY()
 	TArray<UMaterialInstanceDynamic*> DynMatInsts;
+	
 	UPROPERTY()
 	TArray<FName> VisibleGroups;
+	
 	UPROPERTY()
 	UUMJointGroup* SelectedGroup;
 
+// Pose Data
+public:
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FUMControlTransform> InitialPoseData;
+	
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TMap<FName, FRotatorRange> DefaultControls;
+
+	// array, sorted so that the parents come before their children. ensures no out of order ctrl application
+	UPROPERTY()
+	TArray<FRotatorRange> RotatorRanges;
+
+	UPROPERTY()
+	TMap<FName, int> IndexMap; //maps a control name to its place in the above array
+	
+	bool bGenerated;
+	
+
 public:
 	UUMAnimationRecorder();
+	
 	UFUNCTION(BlueprintCallable)
-	static UUMAnimationRecorder* GetNewAnimationRecorder();
+	static UUMAnimationRecorder* GetAnimationRecorder();
+	
 	UFUNCTION(BlueprintCallable)
 	void InitAnimationRecorder(USkeletalMeshComponent* InSkeletalMeshComponent);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TMap<FName, UUMJointGroup*> GetAllGroups() { return AllGroups; }
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	UUMJointGroup* GetGroupWithBone(FName Bone);
+	
 	UFUNCTION(BlueprintCallable)
 	void SelectGroup(UUMJointGroup* Group, bool bForce);
+	
 	FString AllGroupsToString();
+	
 	UFUNCTION(BlueprintCallable)
 	void PrintAllGroups();
+	
 	UFUNCTION(BlueprintCallable)
 	void LoadTimelines(TMap<FName, FUMJointTimeline> Timelines);
-	UFUNCTION(BluePrintCallable)
+	
+	UFUNCTION(BluePrintCallable, BlueprintGetter)
 	UUMJointGroup* GetRootGroup() { return this->RootGroup; }
-	UFUNCTION(BluePrintCallable)
-	TMap<FName, UUMJointGroup*> GetGroups() { return this->AllGroups;}
+	
+	UFUNCTION(BluePrintCallable, BlueprintGetter)
+	TMap<FName, UUMJointGroup*> GetGroups() { return this->AllGroups; }
+
+	UFUNCTION(BlueprintCallable, BlueprintGetter)
+	TMap<FName, int> GetControlIndexMap();
+
+	UFUNCTION(BlueprintCallable, BlueprintGetter)
+	TArray<FRotatorRange> GetControlRanges();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	int GetControlIndex(FName Name);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FRotatorRange GetControlRange(FName Name);
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateControlValue(UPARAM(ref) TArray<FUMControlTransform>& PoseDataRef, int Index, FUMControlTransform NewControlTransform);
+	
+	UFUNCTION(BlueprintCallable)
+	void GeneratePoseData();
+
+
+
+	
 };
