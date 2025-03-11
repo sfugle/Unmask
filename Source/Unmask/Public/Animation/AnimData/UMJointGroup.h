@@ -31,7 +31,7 @@ public:
 	void AddGroups(TArray<UUMJointGroup*>& GroupsIn) { for (const auto& Group : GroupsIn) { AddGroup(Group); }}
 	void AddGroup(UUMJointGroup* Group);
 	void AddJoints(TArray<FUMJoint> JointsIn) { for (auto& Joint : JointsIn) { AddJoint(Joint); } }
-	void AddJoint(FUMJoint& Joint)  { Joints.Add(Joint); Joint.Depth = Depth;}
+	void AddJoint(FUMJoint& Joint)  { Joints.Add(Joint); }
 	void AddBones(TArray<FName> InBones) { for (auto& Bone : InBones) { AddBone(Bone); }}
 	void AddBone(FName InBone) { Bones.Add(InBone); }
 	

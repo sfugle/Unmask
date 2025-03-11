@@ -25,10 +25,11 @@ UUMAnimationRecorder* UUMAnimationRecorder::GetAnimationRecorder()
 }
 
 
-void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkeletalMeshComponent)
+void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkeletalMeshComponent, TMap<FName, FRotatorRange> InControlRanges)
 {
 	this->SkeletalMeshComponent = InSkeletalMeshComponent;
-
+	this->DefaultControlRanges = InControlRanges;
+	
 	auto MatInsts = SkeletalMeshComponent->GetMaterials();
 	
 	bool a = true;
@@ -338,6 +339,7 @@ void UUMAnimationRecorder::UpdateControlValue(TArray<FUMControlTransform>& PoseD
 	}
 	ensure(Index < PoseDataRef.Num() && Index < RotatorRanges.Num());
 	check(PoseDataRef[Index].Name.IsEqual(NewControlTransform.Name));
+	
 	if(RotatorRanges[Index].Within(NewControlTransform.Transform.Rotator()))
 	{
 		PoseDataRef[Index] = NewControlTransform;
@@ -365,20 +367,16 @@ void UUMAnimationRecorder::GeneratePoseData()
 	{
 		IndexMap.Add(AllJointPairs[i].Key, i);
 	}
+	RotatorRanges.Empty();
 	for (auto& JointPair : AllJointPairs)
 	{
-		FUMControlRange& Ctrl = JointPair.Value.Control;
-		FName CtrlName = Ctrl.Name;
-		FRotatorRange RangeVal = FRotatorRange();
-		if(Ctrl.RotatorRange.Min == FRotator::ZeroRotator && Ctrl.RotatorRange.Max == FRotator::ZeroRotator)
+		FName CtrlName = JointPair.Value.ControlName;
+		FRotatorRange RangeVal = FRotatorRange(FRotator::ZeroRotator, FRotator::ZeroRotator);
+		FRotatorRange* RangePtr = DefaultControlRanges.Find(CtrlName);
+		if(RangePtr)
 		{
-			FRotatorRange* RangePtr = DefaultControls.Find(CtrlName);
-			if(RangePtr)
-			{
-				RangeVal = *RangePtr;
-			}
-		} else {
-			RangeVal = Ctrl.RotatorRange;
+			RangeVal = *RangePtr;
+			RangeVal.ComputeRange();
 		}
 		PoseData.Add(FUMControlTransform(CtrlName));
 		RotatorRanges.Add(RangeVal);

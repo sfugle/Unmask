@@ -36,6 +36,15 @@ enum EUMAnimEditor_MatSlot
 	HAND_R,
 };
 
+UCLASS(BlueprintType)
+class UNMASK_API UDA_UMControlRanges : public UDataAsset
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TMap<FName, FRotatorRange> InitialControlRanges;
+};
+
 UCLASS(Blueprintable, BlueprintType)
 class UNMASK_API UUMAnimationRecorder : public UObject
 {
@@ -66,7 +75,7 @@ public:
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TMap<FName, FRotatorRange> DefaultControls;
+	TMap<FName, FRotatorRange> DefaultControlRanges;
 
 	// array, sorted so that the parents come before their children. ensures no out of order ctrl application
 	UPROPERTY()
@@ -85,7 +94,7 @@ public:
 	static UUMAnimationRecorder* GetAnimationRecorder();
 	
 	UFUNCTION(BlueprintCallable)
-	void InitAnimationRecorder(USkeletalMeshComponent* InSkeletalMeshComponent);
+	void InitAnimationRecorder(USkeletalMeshComponent* InSkeletalMeshComponent, TMap<FName, FRotatorRange> InControlRanges);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	TMap<FName, UUMJointGroup*> GetAllGroups() { return AllGroups; }

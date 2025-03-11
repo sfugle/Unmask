@@ -14,37 +14,49 @@ struct FRotatorRange
 {
 	GENERATED_BODY()
 	
-	FRotatorRange(){}
+	FRotatorRange()
+	{
+		ensure(false);	
+	}
 	FRotatorRange(const FRotator& StartIn, const FRotator& EndIn) : Min(StartIn.GetNormalized()), Max(EndIn.GetNormalized()){ ComputeRange(); }
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FRotator Min {FRotator::ZeroRotator};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly) 
 	FRotator Max {FRotator::ZeroRotator};
-	
-protected:
 	bool bDirty = true;
+	
+public:
+	//bool bDirty = true;
 	FQuat MidQuat;
 	float MaxAngularDistance = 0.f;
 public:
-
+	void SetRange(const FRotator& StartIn, const FRotator& EndIn)
+	{
+		Min = StartIn.GetNormalized();
+		Max = EndIn.GetNormalized();
+		ComputeRange();
+	}
 	void ComputeRange()
 	{
 		auto MinQuat = Min.GetNormalized().Quaternion();
 		auto MaxQuat = Max.GetNormalized().Quaternion();
-		MidQuat = FQuat::Slerp(MinQuat, MaxQuat, 0.5);
-		MaxAngularDistance = FQuat::ErrorAutoNormalize(MinQuat, MaxQuat);
+		MidQuat = FQuat::SlerpFullPath_NotNormalized(MinQuat, MaxQuat, 0.5).GetNormalized();
+		// UE_LOG(LogScript, Warning, TEXT("Min: %s, Mid: %s, Max: %s, Angle: %f"),
+		// 	*MinQuat.Rotator().ToCompactString(), *MidQuat.Rotator().ToCompactString(),
+		// 	*MaxQuat.Rotator().ToCompactString(), MaxAngularDistance);
+		MaxAngularDistance = FQuat::Error(MinQuat, MidQuat);
 		bDirty = false;
 	}
 	
 	bool Within(const FRotator& Rotator) const
 	{
 		check(!bDirty)
-		return FQuat::ErrorAutoNormalize(Rotator.Quaternion(), MidQuat) <= MaxAngularDistance;
+		return FQuat::Error(Rotator.Quaternion(), MidQuat) <= MaxAngularDistance;
 	}
 };
 
-// Represents a "ctrl" in the control rig and imparts upon it limits
+// Specifically used to pass FName data along with a 
 USTRUCT(Blueprintable, BlueprintType)
 struct FUMControlRange
 {
@@ -122,18 +134,16 @@ struct FUMJoint
 	GENERATED_BODY()
 public:
 	FUMJoint() : Name("*") {};
-	FUMJoint(FName InName, bool IsFk = false) : Name(InName), Control(FName(InName.ToString() + (IsFk ?  "_fk" : "") + "_ctrl")) {};
+	FUMJoint(FName InName, bool IsFk = false) : Name(InName), ControlName(FName(InName.ToString() + (IsFk ?  "_fk" : "") + "_ctrl")) {};
 	FUMJoint(FName InName, FName InCtrl, FRotatorRange InRangeLimits, FUMJointTimeline InTimeline) :
-		Name(InName), Control(InCtrl), RangeLimits(InRangeLimits), Timeline(InTimeline)
+		Name(InName), ControlName(InCtrl), Timeline(InTimeline)
 	{};
 public:
 	UPROPERTY(Blueprintable, BlueprintReadWrite)
 	FName Name;
 	UPROPERTY(Blueprintable, BlueprintReadWrite)
-	FUMControlRange Control;
+	FName ControlName;
 	int Depth = -1;
-	UPROPERTY(Blueprintable, BlueprintReadWrite)
-	FRotatorRange RangeLimits {FRotatorRange()};
 	UPROPERTY(Blueprintable, BlueprintReadWrite)
 	FUMJointTimeline Timeline; // Collections of keyframes that have been set for the joint
 public:

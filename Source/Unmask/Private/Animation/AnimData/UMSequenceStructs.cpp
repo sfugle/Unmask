@@ -21,9 +21,7 @@ FString FUMJointTimeline::ToString()
 FString FUMJoint::ToString()
 {
 	return "Joint " + this->Name.ToString() + ": Depth " + FString::FromInt(this->Depth) + ", Ctrl " +
-		this->Control.Name.ToString() + "Range (" + this->RangeLimits.Min.ToString() + ", " +
-		this->RangeLimits.Max.ToString() + "), Timeline" + this->Timeline.ToString();
-		
+		this->ControlName.ToString() + ", Timeline" + this->Timeline.ToString();
 }
 
 void UUMSequenceHelper::AddGroups(UUMJointGroup *JointGroup, const TArray<UUMJointGroup*> GroupsIn)

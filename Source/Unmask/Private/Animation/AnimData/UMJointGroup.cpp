@@ -9,7 +9,11 @@ void UUMJointGroup::AddGroup(UUMJointGroup* Group)
 {
 	Groups.Add(Group);
 	Group->Parent = this;
-	Group->Depth = Depth + 1;
+	Group->Depth = this->Depth + 1;
+	for (auto Joint : Group->Joints)
+	{
+		Joint.Depth = this->Depth + 1;
+	}
 }
 
 FString UUMJointGroup::ToString()
