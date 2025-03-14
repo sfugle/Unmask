@@ -4,8 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Animation/AnimData/UMSequenceStructs.h"
-#include "Components/PoseableMeshComponent.h"
+#include "Joint/UMJointStructs.h"
 #include "Templates/Tuple.h"
 #include "UObject/Object.h"
 #include "UMAnimationRecorder.generated.h"
@@ -13,8 +12,8 @@
 /**
  * 
  */
+ 
 
-class UUMPoseData;
 template<typename... Types>  struct TTuple;
 
 USTRUCT()

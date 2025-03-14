@@ -7,19 +7,21 @@
 #include "Animation/AnimData/UMAnimDataController.h"
 #include "Animation/AnimData/UMAnimDataModel.h"
 
-
+// Acts as the custom sequence's version of AnimSequenceBase's Create Model
 void UUMAnimSequence::CorrectModel()
 {
 	if(!bModelCorrected)
 	{
 		UClass* TargetClass = UUMAnimDataModel::StaticClass();
-		UObject* ClassDataModel = NewObject<UObject>(this, TargetClass, TargetClass->GetFName()); //Based off of AnimSequenceBase's Create Model
+		UObject* ClassDataModel = NewObject<UObject>(this, TargetClass, TargetClass->GetFName());
 		DataModelInterface = ClassDataModel;
 		BindToModelModificationEvent();
 		bModelCorrected = true;
 	}
 	if(!bControllerCorrected)
 	{
+		/* See UMAnimationProducer for UUMAnimDataModel/Controller details
+		 * This duplication is necessary to access UAnimSequence data without modifying the engine source */
 		UUMAnimDataController *ControllerObj = NewObject<UUMAnimDataController>(GetTransientPackage());
 		Controller = TScriptInterface<UUMAnimDataController>(ControllerObj);
 		Controller->SetModel(DataModelInterface);

@@ -4,7 +4,9 @@
 #include "Animation/UMAnimationRecorder.h"
 #include "Animation/Skeleton.h"
 #include "Animation/AnimData/UMSequenceStructs.h"
-#include "Animation/AnimData/UMJointGroup.h"
+#include "Animation/Joint/UMJointControl.h"
+#include "Animation/Joint/UMJointGroup.h"
+#include "Animation/Joint/UMJointStructs.h"
 
 class UUMSequenceHelper;
 class UUMAnimationRecorder;
@@ -110,12 +112,10 @@ void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkele
 		"pinky_02_l", "pinky_03_l", "ring_metacarpal_l", "ring_01_l", "ring_02_l", "ring_03_l", "thumb_01_l",
 		"thumb_02_l",});
 	FUMJoint
-		LeftThumb(FName("thumb_01_l")),
-		LeftIndex(FName("index_01_l")),
-		LeftMiddle(FName("middle_01_l")),
-		LeftRing(FName("ring_01_l")),
-		LeftPinky(FName("pinky_01_l"));
-	LeftHand->AddJoints({LeftThumb, LeftIndex, LeftMiddle, LeftRing, LeftPinky});
+		//LeftThumb(FName("thumb_02_l")),
+		LeftIndex(FName("index_metacarpal_l")),
+		LeftMiddle(FName("middle_metacarpal_l"));
+	LeftHand->AddJoints({LeftIndex, LeftMiddle});
 	LeftArm->AddGroup(LeftHand);
 	
 	UUMJointGroup* RightHand = NewObject<UUMJointGroup>();
@@ -126,12 +126,10 @@ void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkele
 		"pinky_02_r", "pinky_03_r", "ring_metacarpal_r", "ring_01_r", "ring_02_r", "ring_03_r", "thumb_01_r",
 		"thumb_02_r"});
 	FUMJoint
-		RightThumb(FName("thumb_01_r")),
-		RightIndex(FName("index_01_r")),
-		RightMiddle(FName("middle_01_r")),
-		RightRing(FName("ring_01_r")),
-		RightPinky(FName("pinky_01_r"));
-	RightHand->AddJoints({RightThumb, RightIndex, RightMiddle, RightRing, RightPinky});
+		//RightThumb(FName("thumb_01_r")),
+		RightIndex(FName("index_metacarpal_r")),
+		RightMiddle(FName("middle_metacarpal_r"));
+	RightHand->AddJoints({RightIndex, RightMiddle});
 	RightArm->AddGroup(RightHand);
 
 	for (auto Pair : AllGroups)
@@ -349,13 +347,13 @@ void UUMAnimationRecorder::UpdateControlValue(TArray<FUMControlTransform>& PoseD
 void UUMAnimationRecorder::GeneratePoseData()
 {
 	TArray<TPair<FName, FUMJoint>> AllJointPairs;
-	TArray<FUMControlTransform> PoseData;
+	TArray<FUMControlTransform> JointControls;
 	for (auto Tuple : AllGroups)
 	{
 		auto Group = Tuple.Value;
 		for(auto Joint : Group->Joints)
 		{
-			AllJointPairs.Add({Tuple.Key, Joint});
+			AllJointPairs.Add(TPair<FName, FUMJoint>(Tuple.Key, Joint));
 		}
 	}
 	AllJointPairs.Sort(
@@ -370,7 +368,9 @@ void UUMAnimationRecorder::GeneratePoseData()
 	RotatorRanges.Empty();
 	for (auto& JointPair : AllJointPairs)
 	{
-		FName CtrlName = JointPair.Value.ControlName;
+		FUMJoint &Joint = JointPair.Value;
+		FName CtrlName = Joint.ControlName;
+		
 		FRotatorRange RangeVal = FRotatorRange(FRotator::ZeroRotator, FRotator::ZeroRotator);
 		FRotatorRange* RangePtr = DefaultControlRanges.Find(CtrlName);
 		if(RangePtr)
@@ -378,9 +378,11 @@ void UUMAnimationRecorder::GeneratePoseData()
 			RangeVal = *RangePtr;
 			RangeVal.ComputeRange();
 		}
-		PoseData.Add(FUMControlTransform(CtrlName));
+		Joint.Control->Setup(CtrlName, RangeVal, FName(Joint.Name.ToString()+FString("Socket")), SkeletalMeshComponent);
+		JointControls.Add(Joint.Control->GetState());
 		RotatorRanges.Add(RangeVal);
 	}
+	
 	bGenerated = true;
-	InitialPoseData = PoseData;
+	InitialPoseData = JointControls;
 }

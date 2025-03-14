@@ -31,7 +31,7 @@ float UUMAnimationConsumer::SequenceDifference(UAnimSequence *X, UAnimSequence *
 			ProblemAsset += "Y";
 		}
 		UE_LOG(LogScript, Error, TEXT("UMAnimationConsumer: Called on missing sequence %s."), ToCStr(ProblemAsset));
-		return -99999;
+		return -INFINITY;
 	}
 	
 	USkeleton* XSkeleton = X->GetSkeleton();

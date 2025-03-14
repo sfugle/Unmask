@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "Animation/AnimData/UMSequenceStructs.h"
 #include "Animation/UMAnimationProducer.h"
+#include "Animation/Joint/UMJointStructs.h"
 #include "UMCueTree.generated.h"
 
 USTRUCT(Blueprintable, BlueprintType)
