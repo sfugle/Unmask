@@ -1,8 +1,7 @@
 #include "Animation/Joint/UMJointGroup.h"
 #include "Animation/UMAnimationProducer.h"
-#include "Animation/Joint/UMJointControl.h"
 
-// Store the depth of the joint in its group, then add all of the joints to pose data sorted by their depth. 
+// Store the depth of the joint in its group, then add all the joints to pose data sorted by their depth. 
 // This ensures that the parent is never applied after the child.
 //Add bounds as a struct (of froters) at blueprint level for easy modification.
 
@@ -13,7 +12,7 @@ void UUMJointGroup::AddGroup(UUMJointGroup* Group)
 	Group->Depth = this->Depth + 1;
 	for (auto Joint : Group->Joints)
 	{
-		Joint.Depth = this->Depth + 1;
+		Joint->Depth = this->Depth + 1;
 	}
 }
 
@@ -40,7 +39,7 @@ FString UUMJointGroup::ToString()
 		for (int i = 0; i < JointGroup->Joints.Num(); i++)
 		{
 			auto& Joint = JointGroup->Joints[i];
-			StringBuilder->Append(Joint.ToString());
+			StringBuilder->Append(Joint->ToString());
 			if (i <JointGroup->Joints.Num() - 1)
 			{
 				StringBuilder->Append(TEXT(", "));
@@ -105,22 +104,22 @@ UAnimSequence* UUMSequenceHelper::BuildSequence(UUMJointGroup* JointGroup, USkel
 	{
 		UUMJointGroup* Group;
 		Queue.Dequeue(Group);
-		for (UUMJointGroup* G : Group->Groups)
+		for (UUMJointGroup* SubGroup : Group->Groups)
 		{
-			Queue.Enqueue(G);
+			Queue.Enqueue(SubGroup);
 		}
-		for (FUMJoint J : Group->Joints)
+		for (UUMJoint* Joint : Group->Joints)
 		{
-			float Scale = J.Timeline.Duration / J.Timeline.Timeline[J.Timeline.Timeline.Num() - 1].Time;
+			float Scale = Joint->Timeline.Duration / Joint->Timeline.Timeline[Joint->Timeline.Timeline.Num() - 1].Time;
 			FUMJointTimeline NewTimeline;
-			for (FUMJointKey Key : J.Timeline.Timeline)
+			for (FUMJointKey Key : Joint->Timeline.Timeline)
 			{
 				FUMJointKey NewKey;
-				NewKey.Time = (Key.Time * Scale) + J.Timeline.StartTime;
+				NewKey.Time = (Key.Time * Scale) + Joint->Timeline.StartTime;
 				NewKey.Transform = Key.Transform;
 				NewTimeline.Timeline.Add(NewKey);
 			}
-			Timelines.Add(J.Name, NewTimeline);
+			Timelines.Add(Joint->Name, NewTimeline);
 		}
 	}
 	return UUMAnimationProducer::CreateSequence(Timelines, SkeletalMesh);

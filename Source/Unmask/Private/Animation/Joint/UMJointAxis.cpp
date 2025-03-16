@@ -18,7 +18,7 @@ AUMJointAxis::AUMJointAxis() : Parent(nullptr)
 		UE_LOG(LogScript, Error, TEXT("[UMJointAxis] ctor: Missing mesh for Joint Axes"))
 	}
 	this->GetStaticMeshComponent()->SetRenderCustomDepth(true);
-	//this->GetStaticMeshComponent()->SetVisibility(false);
+	this->GetStaticMeshComponent()->SetVisibility(false);
 }
 
 // Called when the game starts or when spawned

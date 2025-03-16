@@ -27,6 +27,7 @@ protected:
 	FUMControlRange Range;
 
 public:
+	
 	void Setup(FName CtrlName, const FRotatorRange& InRange, /*For axis*/ FName SocketName, USkeletalMeshComponent* SkeletalMeshComponent);
 	UFUNCTION(BlueprintCallable, BlueprintGetter)
 	FUMControlTransform GetState() { return State; }

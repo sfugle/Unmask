@@ -24,19 +24,19 @@ public:
 	UPROPERTY(Blueprintable, BlueprintReadWrite)
 	TArray<UUMJointGroup*> Groups;
 	UPROPERTY(Blueprintable, BlueprintReadWrite)
-	TArray<FUMJoint> Joints;
+	TArray<UUMJoint*> Joints;
 	TSet<FName> Bones;
 public:
 	UUMJointGroup() : Name("*") {}
-	UUMJointGroup(FName InName) : Name(InName) {}
+	UUMJointGroup(const FName InName) : Name(InName) {}
 	
 	void AddGroups(TArray<UUMJointGroup*>& GroupsIn) { for (const auto& Group : GroupsIn) { AddGroup(Group); }}
 	void AddGroup(UUMJointGroup* Group);
-	void AddJoints(FUMJointsAggregate &JointsAggregateIn) { for (auto& Joint : JointsAggregateIn.JointArray) { AddJoint(Joint); } }
-	void AddJoints(TArray<FUMJoint>& JointsIn) { for (auto& Joint : JointsIn) { AddJoint(Joint); } }
-	void AddJoint(FUMJoint& Joint)  { Joints.Add(Joint); Joint.Parent = this; }
-	void AddBones(TArray<FName> InBones) { for (auto& Bone : InBones) { AddBone(Bone); }}
-	void AddBone(FName InBone) { Bones.Add(InBone); }
+	void AddJoints(FUMJointsAggregate &JointsAggregateIn) { for (const auto& Joint : JointsAggregateIn.JointArray) { AddJoint(Joint); } }
+	void AddJoints(TArray<UUMJoint*>& JointsIn) { for (const auto& Joint : JointsIn) { AddJoint(Joint); } }
+	void AddJoint(UUMJoint* Joint)  { Joints.Add(Joint); Joint->Parent = this; }
+	void AddBones(TArray<FName> InBones) { for (const auto& Bone : InBones) { AddBone(Bone); }}
+	void AddBone(const FName InBone) { Bones.Add(InBone); }
 	
 	FString ToString();
 	bool ContainsBone(FName BoneName, bool bIncludeChildren);

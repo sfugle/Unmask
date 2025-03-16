@@ -4,6 +4,7 @@
 #include "Animation/UMAnimationRecorder.h"
 #include "Animation/Skeleton.h"
 #include "Animation/AnimData/UMSequenceStructs.h"
+#include "Animation/Joint/UMJoint.h"
 #include "Animation/Joint/UMJointControl.h"
 #include "Animation/Joint/UMJointGroup.h"
 #include "Animation/Joint/UMJointStructs.h"
@@ -50,21 +51,20 @@ void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkele
 	RootGroup->AddBones({"root", "pelvis", "spine_01", "spine_02", "spine_03", "spine_04", "spine_05", "clavicle_l", "neck_01", "neck_02", "head",
 		"clavicle_r", });
 	this->AllGroups.Add(this->RootGroup->Name, this->RootGroup);
-	FUMJoint
-		LeftShoulder(FName("upperarm_l"), true),
-		RightShoulder(FName("upperarm_r"), true),
-		Pelvis(FName("pelvis")),
-		Spine01(FName("spine_01")),
-		Spine02(FName("spine_02")),
-		Spine03(FName("spine_03")),
-		LeftClavicle(FName("clavicle_l")),
-		RightClavicle(FName("clavicle_r")),
-		Neck(FName("neck_01")),
-		HeadJoint(FName("head"));
+	UUMJoint* LeftShoulder = NewObject<UUMJoint>()->Init(FName("upperarm_l"), true);
+	UUMJoint* RightShoulder = NewObject<UUMJoint>()->Init(FName("upperarm_r"), true);
+	UUMJoint* Pelvis = NewObject<UUMJoint>()->Init(FName("pelvis"));
+	UUMJoint* Spine01 = NewObject<UUMJoint>()->Init(FName("spine_01"));
+	UUMJoint* Spine02 = NewObject<UUMJoint>()->Init(FName("spine_02"));
+	UUMJoint* Spine03 = NewObject<UUMJoint>()->Init(FName("spine_03"));
+	UUMJoint* LeftClavicle = NewObject<UUMJoint>()->Init(FName("clavicle_l"));
+	UUMJoint* RightClavicle = NewObject<UUMJoint>()->Init(FName("clavicle_r"));
+	UUMJoint* Neck = NewObject<UUMJoint>()->Init(FName("neck_01"));
+	UUMJoint* HeadJoint = NewObject<UUMJoint>()->Init(FName("head"));
 	NewJoints = BlankAggregate;
-	NewJoints = AllJointAggregates.Add(RootGroup->Name,
-		FUMJointsAggregate(SkeletalMeshComponent, {Neck, HeadJoint, LeftShoulder, RightShoulder, Pelvis, Spine01, Spine02, Spine03, LeftClavicle, RightClavicle})
-	);
+	NewJoints = CreateJoints(RootGroup->Name,
+		{Neck, HeadJoint, LeftShoulder, RightShoulder, Pelvis, Spine01, Spine02, Spine03, LeftClavicle, RightClavicle}
+		);
 	RootGroup->AddJoints(NewJoints);
 	
 	UUMJointGroup *LeftLeg = NewObject<UUMJointGroup>();
@@ -72,11 +72,10 @@ void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkele
 	AllGroups.Add(LeftLeg->Name, LeftLeg);
 	LeftLeg->AddBones({"thigh_l", "calf_l", "calf_twist_01_l", "calf_twist_02_l", "thigh_twist_01_l",
 		"thigh_twist_02_l", "foot_l", "ball_l"});
-	FUMJoint
-		LeftThigh(FName("thigh_l"), true),
-		LeftCalf(FName("calf_l"), true);
+	UUMJoint* LeftThigh = NewObject<UUMJoint>()->Init(FName("thigh_l"), true);
+	UUMJoint* LeftCalf = NewObject<UUMJoint>()->Init(FName("calf_l"), true);
 	NewJoints = BlankAggregate;
-	NewJoints = AllJointAggregates.Add(LeftLeg->Name,FUMJointsAggregate(SkeletalMeshComponent, {LeftThigh, LeftCalf}));
+	NewJoints = CreateJoints(LeftLeg->Name, {LeftThigh, LeftCalf});
 	LeftLeg->AddJoints(NewJoints);
 	RootGroup->AddGroup(LeftLeg);
 
@@ -84,11 +83,10 @@ void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkele
 	RightLeg->Name =  FName("leg_r");
 	AllGroups.Add(RightLeg->Name, RightLeg);
 	RightLeg->AddBones({"thigh_r","calf_r", "calf_twist_01_r", "calf_twist_02_r", "thigh_twist_01_r", "thigh_twist_02_r", "foot_r", "ball_r"});
-	FUMJoint
-		RightThigh(FName("thigh_r"), true),
-		RightCalf(FName("calf_r"), true);
+	UUMJoint* RightThigh = NewObject<UUMJoint>()->Init(FName("thigh_r"), true);
+	UUMJoint* RightCalf = NewObject<UUMJoint>()->Init(FName("calf_r"), true);
 	NewJoints = BlankAggregate;
-	NewJoints = AllJointAggregates.Add(RightLeg->Name, FUMJointsAggregate(SkeletalMeshComponent, {RightThigh, RightCalf}));
+	NewJoints = CreateJoints(RightLeg->Name, {RightThigh, RightCalf});
 	RightLeg->AddJoints(NewJoints);
 	RootGroup->AddGroup(RightLeg);
 	
@@ -97,11 +95,10 @@ void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkele
 	AllGroups.Add(LeftArm->Name, LeftArm);
 	LeftArm->AddBones({"thumb_03_l", "lowerarm_l", "lowerarm_twist_01_l", "lowerarm_twist_02_l", "upperarm_l"
 	});
-	FUMJoint
-		LowerLeftArm(FName("lowerarm_l")),
-		LeftWrist(FName("hand_l"), true);
+	UUMJoint* LowerLeftArm = NewObject<UUMJoint>()->Init(FName("lowerarm_l"));
+	UUMJoint* LeftWrist = NewObject<UUMJoint>()->Init(FName("hand_l"), true);
 	NewJoints = BlankAggregate;
-	NewJoints = AllJointAggregates.Add(LeftArm->Name, FUMJointsAggregate(SkeletalMeshComponent, {LowerLeftArm, LeftWrist}));
+	NewJoints = CreateJoints(LeftArm->Name, {LowerLeftArm, LeftWrist});
 	LeftArm->AddJoints(NewJoints);
 	RootGroup->AddGroup(LeftArm);
 	
@@ -109,11 +106,10 @@ void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkele
 	RightArm->Name = FName("arm_r");
 	AllGroups.Add(RightArm->Name, RightArm);
 	RightArm->AddBones({"upperarm_r", "lowerarm_r", "lowerarm_twist_01_r", "lowerarm_twist_02_r"});
-	FUMJoint
-		LowerRightArm(FName("lowerarm_r"), true),
-		RightWrist(FName("hand_r"), true);
+	UUMJoint* 	LowerRightArm = NewObject<UUMJoint>()->Init(FName("lowerarm_r"), true);
+	UUMJoint* 	RightWrist = NewObject<UUMJoint>()->Init(FName("hand_r"), true);
 	NewJoints = BlankAggregate;
-	NewJoints = AllJointAggregates.Add(RightArm->Name, FUMJointsAggregate(SkeletalMeshComponent, {LowerRightArm, RightWrist}));
+	NewJoints = CreateJoints(RightArm->Name,{LowerRightArm, RightWrist});
 	RightArm->AddJoints(NewJoints);
 	RootGroup->AddGroup(RightArm);
 
@@ -124,12 +120,11 @@ void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkele
 		"middle_metacarpal_l", "middle_01_l", "middle_02_l", "middle_03_l", "pinky_metacarpal_l", "pinky_01_l",
 		"pinky_02_l", "pinky_03_l", "ring_metacarpal_l", "ring_01_l", "ring_02_l", "ring_03_l", "thumb_01_l",
 		"thumb_02_l",});
-	FUMJoint
 		//LeftThumb(FName("thumb_02_l")),
-		LeftIndex(FName("index_metacarpal_l")),
-		LeftMiddle(FName("middle_metacarpal_l"));
+	UUMJoint* LeftIndex = NewObject<UUMJoint>()->Init(FName("index_metacarpal_l"));
+	UUMJoint* LeftMiddle = NewObject<UUMJoint>()->Init(FName("middle_metacarpal_l"));
 	NewJoints = BlankAggregate;
-	NewJoints = AllJointAggregates.Add(LeftHand->Name, FUMJointsAggregate(SkeletalMeshComponent, {LeftIndex, LeftMiddle}));
+	NewJoints = CreateJoints(LeftHand->Name,{LeftIndex, LeftMiddle});
 	LeftHand->AddJoints(NewJoints);
 	LeftArm->AddGroup(LeftHand);
 	
@@ -140,12 +135,11 @@ void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkele
 		"middle_metacarpal_r", "middle_01_r", "middle_02_r", "middle_03_r", "pinky_metacarpal_r", "pinky_01_r",
 		"pinky_02_r", "pinky_03_r", "ring_metacarpal_r", "ring_01_r", "ring_02_r", "ring_03_r", "thumb_01_r",
 		"thumb_02_r"});
-	FUMJoint
 		//RightThumb(FName("thumb_01_r")),
-		RightIndex(FName("index_metacarpal_r")),
-		RightMiddle(FName("middle_metacarpal_r"));
+	UUMJoint* RightIndex = NewObject<UUMJoint>()->Init(FName("index_metacarpal_r"));
+	UUMJoint* RightMiddle = NewObject<UUMJoint>()->Init(FName("middle_metacarpal_r"));
 	NewJoints = BlankAggregate;
-	NewJoints = AllJointAggregates.Add(RightHand->Name, FUMJointsAggregate(SkeletalMeshComponent, {RightIndex, RightMiddle}));
+	NewJoints = CreateJoints(RightHand->Name, {RightIndex, RightMiddle});
 	RightHand->AddJoints(NewJoints);
 	RightArm->AddGroup(RightHand);
 
@@ -153,11 +147,170 @@ void UUMAnimationRecorder::InitAnimationRecorder(USkeletalMeshComponent* InSkele
 	{
 		VisibleGroups.Add(Pair.Key);
 	}
-	SelectedGroup = RootGroup;
 	GeneratePoseData();
 }
 
-UUMJointGroup* UUMAnimationRecorder::GetGroupWithBone(FName BoneName)
+FString UUMAnimationRecorder::AllGroupsToString()
+{
+	auto StringBuilder = new TStringBuilder<1024 * sizeof(FString)>();
+	StringBuilder->Append(TEXT("["));
+	for (auto Tuple : AllGroups)
+	{
+		auto& Name = Tuple.Key;
+		auto& Group = Tuple.Value;
+		StringBuilder->Append(Name.ToString() + TEXT(": \n\tJoints: [") );
+		for (int i = 0; i < Group->Joints.Num(); i++)
+		{
+			auto& Joint = Group->Joints[i];
+			StringBuilder->Append(*Joint->ToString());
+			if (i < Group->Joints.Num() - 1)
+			{
+				StringBuilder->Append(TEXT(", "));
+			}
+		}
+		StringBuilder->Append(TEXT("]\n\tGroups: ["));
+		for (int i = 0; i < Group->Groups.Num(); i++)
+		{
+			auto& ChildGroup = Group->Groups[i];
+			if(ChildGroup->Name.IsValid())
+			{
+				StringBuilder->Append(ChildGroup->Name.ToString());
+			} else
+			{
+				StringBuilder->Append("*");
+			}
+			
+			if (i < Group->Groups.Num() - 1)
+			{
+				StringBuilder->Append(TEXT(", "));
+			}
+		}
+		StringBuilder->Append(TEXT("]\n"));
+	}
+	return StringBuilder->ToString();
+}
+
+void UUMAnimationRecorder::PrintAllGroups()
+{
+	FString out = AllGroupsToString();
+	UE_LOG(LogCore, Display, TEXT("\n%s"), *out);
+	if(GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::White,  FString::Printf(TEXT("%s"), *out));
+}
+
+void UUMAnimationRecorder::LoadTimelines(TMap<FName, FUMJointTimeline> Timelines)
+{
+	for (TTuple<FName, FUMJointTimeline> Timeline : Timelines)
+	{
+		for (TTuple<FName, UUMJointGroup*> Tuple : this->AllGroups)
+		{
+			bool Exit = false;
+			for (int i = 0; i < Tuple.Value->Joints.Num(); i++)
+			{
+				if (Tuple.Value->Joints[i]->Name == Timeline.Key)
+				{
+					Exit = true;
+					(*this->AllGroups.Find(Tuple.Key))->Joints[i]->Timeline = Timeline.Value;
+					break;
+				}
+			}
+			if (Exit) break;
+		}
+	}
+}
+
+TMap<FName, int> UUMAnimationRecorder::GetControlIndexMap()
+{
+	return IndexMap;
+}
+
+TArray<FRotatorRange> UUMAnimationRecorder::GetControlRanges()
+{
+	return RotatorRanges;
+}
+
+int UUMAnimationRecorder::GetControlIndex(const FName Name)
+{
+	if(!bGenerated)
+	{
+		GeneratePoseData();
+	}
+	return IndexMap.FindChecked(Name);
+}
+
+FRotatorRange UUMAnimationRecorder::GetControlRange(FName Name)
+{
+	if(!bGenerated)
+	{
+		GeneratePoseData();
+	}
+	const int Index = IndexMap.FindChecked(Name);
+	return RotatorRanges[Index];
+}
+
+void UUMAnimationRecorder::UpdateControlValue(TArray<FUMControlTransform>& PoseDataRef, int Index, FUMControlTransform NewControlTransform)
+{
+	if(!bGenerated)
+	{
+		GeneratePoseData();
+	}
+	ensure(Index < PoseDataRef.Num() && Index < RotatorRanges.Num());
+	check(PoseDataRef[Index].Name.IsEqual(NewControlTransform.Name));
+	
+	if(RotatorRanges[Index].Within(NewControlTransform.Transform.Rotator()))
+	{
+		PoseDataRef[Index] = NewControlTransform;
+	}
+	for (auto& JointAggregate : AllJointAggregates)
+	{
+		JointAggregate.Value.Update();
+	}
+}
+
+void UUMAnimationRecorder::GeneratePoseData()
+{
+	TArray<TPair<FName, UUMJoint*>> AllJointPairs;
+	TArray<FUMControlTransform> JointControls;
+	for (auto JointGroup : AllJointAggregates)
+	{
+		FName &GroupName = JointGroup.Key;
+		for (auto Joint : JointGroup.Value.JointArray)
+		{
+			AllJointPairs.Add(TPair<FName, UUMJoint*>(GroupName, Joint));
+		}
+	}
+	AllJointPairs.Sort(
+		[](const TPair<FName, UUMJoint*>& Pair1, const TPair<FName, UUMJoint*>& Pair2) -> bool
+			{return Pair1.Value->Depth < Pair2.Value->Depth;}
+	);
+	IndexMap.Reserve(AllJointPairs.Num());
+	for (int i = 0; i < AllJointPairs.Num(); i++)
+	{
+		IndexMap.Add(AllJointPairs[i].Key, i);
+	}
+	RotatorRanges.Empty();
+	for (auto& JointPair : AllJointPairs)
+	{
+		UUMJoint* &Joint = JointPair.Value;
+		FName CtrlName = Joint->ControlName;
+		
+		FRotatorRange RangeVal = FRotatorRange(FRotator::ZeroRotator, FRotator::ZeroRotator);
+		FRotatorRange* RangePtr = DefaultControlRanges.Find(CtrlName);
+		if(RangePtr)
+		{
+			RangeVal = *RangePtr;
+			RangeVal.ComputeRange();
+		}
+		Joint->Control->Setup(CtrlName, RangeVal, FName(Joint->Name.ToString()+FString("Socket")), SkeletalMeshComponent);
+		JointControls.Add(Joint->Control->GetState());
+		RotatorRanges.Add(RangeVal);
+	}
+	
+	bGenerated = true;
+	InitialPoseData = JointControls;
+}
+
+
+UUMJointGroup* UUMAnimationRecorder::GetGroupByBone(FName BoneName)
 {
 	for (auto Tuple : AllGroups)
 	{
@@ -172,15 +325,17 @@ UUMJointGroup* UUMAnimationRecorder::GetGroupWithBone(FName BoneName)
 	return nullptr;
 }
 
-void UUMAnimationRecorder::SelectGroupByName(FName Name, bool bForce=false)
+bool UUMAnimationRecorder::SelectGroupByName(FName Name, bool bForce = false)
 {
 
 	auto Group = AllGroups.Find(Name);
 	if(Group)
 	{
 		SelectGroup(*Group, bForce);
+		return true;
 	} else {
 		UE_LOG(LogScript, Warning, TEXT("[AnimationRecorder] Invalid Group name \"%s\" for SelectGroupByName"), *Name.ToString())
+		return false;
 	}
 
 }
@@ -263,163 +418,14 @@ void UUMAnimationRecorder::SelectGroup(UUMJointGroup* Group, bool bForce=false)
 	SelectedGroup = Group;
 }
 
-FString UUMAnimationRecorder::AllGroupsToString()
+FUMJointsAggregate& UUMAnimationRecorder::CreateJoints(FName GroupName, const TArray<UUMJoint*>& InJoints)
 {
-	auto StringBuilder = new TStringBuilder<1024 * sizeof(FString)>();
-	StringBuilder->Append(TEXT("["));
-	for (auto Tuple : AllGroups)
+	for (UUMJoint* Joint : InJoints)
 	{
-		auto& Name = Tuple.Key;
-		auto& Group = Tuple.Value;
-		StringBuilder->Append(Name.ToString() + TEXT(": \n\tJoints: [") );
-		for (int i = 0; i < Group->Joints.Num(); i++)
-		{
-			auto& Joint = Group->Joints[i];
-			StringBuilder->Append(*Joint.ToString());
-			if (i < Group->Joints.Num() - 1)
-			{
-				StringBuilder->Append(TEXT(", "));
-			}
-		}
-		StringBuilder->Append(TEXT("]\n\tGroups: ["));
-		for (int i = 0; i < Group->Groups.Num(); i++)
-		{
-			auto& ChildGroup = Group->Groups[i];
-			if(ChildGroup->Name.IsValid())
-			{
-				StringBuilder->Append(ChildGroup->Name.ToString());
-			} else
-			{
-				StringBuilder->Append("*");
-			}
-			
-			if (i < Group->Groups.Num() - 1)
-			{
-				StringBuilder->Append(TEXT(", "));
-			}
-		}
-		StringBuilder->Append(TEXT("]\n"));
+		AllJoints.Add(Joint->Name, Joint);
+		UE_LOG(LogScript, Warning, TEXT("Joint: %s"), *Joint->Name.ToString())
 	}
-	return StringBuilder->ToString();
-}
-
-void UUMAnimationRecorder::PrintAllGroups()
-{
-	FString out = AllGroupsToString();
-	UE_LOG(LogCore, Display, TEXT("\n%s"), *out);
-	if(GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::White,  FString::Printf(TEXT("%s"), *out));
-}
-
-void UUMAnimationRecorder::LoadTimelines(TMap<FName, FUMJointTimeline> Timelines)
-{
-	for (TTuple<FName, FUMJointTimeline> Timeline : Timelines)
-	{
-		for (TTuple<FName, UUMJointGroup*> Tuple : this->AllGroups)
-		{
-			bool Exit = false;
-			for (int i = 0; i < Tuple.Value->Joints.Num(); i++)
-			{
-				if (Tuple.Value->Joints[i].Name == Timeline.Key)
-				{
-					Exit = true;
-					(*this->AllGroups.Find(Tuple.Key))->Joints[i].Timeline = Timeline.Value;
-					break;
-				}
-			}
-			if (Exit) break;
-		}
-	}
-}
-
-TMap<FName, int> UUMAnimationRecorder::GetControlIndexMap()
-{
-	return IndexMap;
-}
-
-TArray<FRotatorRange> UUMAnimationRecorder::GetControlRanges()
-{
-	return RotatorRanges;
-}
-
-int UUMAnimationRecorder::GetControlIndex(const FName Name)
-{
-	if(!bGenerated)
-	{
-		GeneratePoseData();
-	}
-	return IndexMap.FindChecked(Name);
-}
-
-FRotatorRange UUMAnimationRecorder::GetControlRange(FName Name)
-{
-	if(!bGenerated)
-	{
-		GeneratePoseData();
-	}
-	const int Index = IndexMap.FindChecked(Name);
-	return RotatorRanges[Index];
-}
-
-void UUMAnimationRecorder::UpdateControlValue(TArray<FUMControlTransform>& PoseDataRef, int Index, FUMControlTransform NewControlTransform)
-{
-	if(!bGenerated)
-	{
-		GeneratePoseData();
-	}
-	ensure(Index < PoseDataRef.Num() && Index < RotatorRanges.Num());
-	check(PoseDataRef[Index].Name.IsEqual(NewControlTransform.Name));
-	
-	if(RotatorRanges[Index].Within(NewControlTransform.Transform.Rotator()))
-	{
-		PoseDataRef[Index] = NewControlTransform;
-	}
-	for (auto& JointAggregate : AllJointAggregates)
-	{
-		JointAggregate.Value.Update();
-	}
-}
-
-void UUMAnimationRecorder::GeneratePoseData()
-{
-	TArray<TPair<FName, FUMJoint>> AllJointPairs;
-	TArray<FUMControlTransform> JointControls;
-	for (auto JointGroup : AllJointAggregates)
-	{
-		FName &GroupName = JointGroup.Key;
-		for (auto Joint : JointGroup.Value.JointArray)
-		{
-			AllJointPairs.Add(TPair<FName, FUMJoint>(GroupName, Joint));
-		}
-	}
-	AllJointPairs.Sort(
-		[](const auto& Pair1, const auto& Pair2) -> bool
-			{return Pair1.Value.Depth < Pair2.Value.Depth;}
-	);
-	IndexMap.Reserve(AllJointPairs.Num());
-	for (int i = 0; i < AllJointPairs.Num(); i++)
-	{
-		IndexMap.Add(AllJointPairs[i].Key, i);
-	}
-	RotatorRanges.Empty();
-	for (auto& JointPair : AllJointPairs)
-	{
-		FUMJoint &Joint = JointPair.Value;
-		FName CtrlName = Joint.ControlName;
-		
-		FRotatorRange RangeVal = FRotatorRange(FRotator::ZeroRotator, FRotator::ZeroRotator);
-		FRotatorRange* RangePtr = DefaultControlRanges.Find(CtrlName);
-		if(RangePtr)
-		{
-			RangeVal = *RangePtr;
-			RangeVal.ComputeRange();
-		}
-		Joint.Control->Setup(CtrlName, RangeVal, FName(Joint.Name.ToString()+FString("Socket")), SkeletalMeshComponent);
-		JointControls.Add(Joint.Control->GetState());
-		RotatorRanges.Add(RangeVal);
-	}
-	
-	bGenerated = true;
-	InitialPoseData = JointControls;
+	return AllJointAggregates.Add(GroupName, FUMJointsAggregate(SkeletalMeshComponent, InJoints));
 }
 
 TMap<FName, FVector> UUMAnimationRecorder::GetJointPositions()
@@ -427,7 +433,7 @@ TMap<FName, FVector> UUMAnimationRecorder::GetJointPositions()
 	TMap<FName, FVector> Return;
 	for (auto Joint : SelectedGroup->Joints)
 	{
-		Return.Add(SelectedGroup->Name, SkeletalMeshComponent->GetBoneTransform(Joint.Name, RTS_World).GetTranslation());
+		Return.Add(Joint->Name, SkeletalMeshComponent->GetBoneTransform(Joint->Name, RTS_World).GetTranslation());
 	}
 	return Return;
 }
@@ -448,3 +454,4 @@ TMap<FName, FVector> UUMAnimationRecorder::GetGroupPositions()
 	}
 	return Return;
 }
+

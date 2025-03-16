@@ -1,8 +1,8 @@
 #pragma once
 //#include "UMJointControl.h"
-#include "Animation/AnimData/UMSequenceStructs.h"
 #include "UMJointStructs.generated.h"
 
+class UUMJoint;
 class UUMJointControl;
 class UUMJointGroup;
 
@@ -52,16 +52,18 @@ public:
 };
 
 
+
+/*
 // Represents a bone within the pose-able skeleton
 // Holds its own timeline of keys, its own name, and the limit that joint can be rotated within
 USTRUCT(Blueprintable, BlueprintType)
-struct FUMJoint
+struct FUMJoint1
 {
 	GENERATED_BODY()
 public:
-	FUMJoint();
-	FUMJoint(FName InName, bool IsFk = false);
-	FUMJoint(FName InName, FName InCtrl, FRotatorRange InRangeLimits, const FUMJointTimeline& InTimeline);
+	FUMJoint1() {};
+	FUMJoint1(FName InName, bool IsFk = false) {};
+	//FUMJoint1(FName InName, FName InCtrl, FRotatorRange InRangeLimits, const FUMJointTimeline& InTimeline);
 public:
 	UPROPERTY()
 	UUMJointGroup* Parent = nullptr;
@@ -72,11 +74,11 @@ public:
 	UPROPERTY(Blueprintable, BlueprintReadOnly)
 	UUMJointControl* Control;
 	int Depth = -1;
-	UPROPERTY(Blueprintable, BlueprintReadWrite)
-	FUMJointTimeline Timeline; // Collections of keyframes that have been set for the joint
+	//UPROPERTY(Blueprintable, BlueprintReadWrite)
+	//FUMJointTimeline Timeline; // Collections of keyframes that have been set for the joint
 public:
 	FString ToString();
-};
+};*/
 
 // Specifically used to pass FName data along with a 
 USTRUCT(Blueprintable, BlueprintType)
@@ -98,6 +100,7 @@ public:
 	TArray<FTransform> InitialTransforms = TArray<FTransform>{FTransform::Identity, FTransform::Identity, FTransform::Identity};
 };
 
+
 USTRUCT(Blueprintable, BlueprintType)
 struct FUMControlTransform
 {
@@ -110,6 +113,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTransform Transform = FTransform::Identity;
 };
+
 
 
 class UUMJointGroup;
@@ -132,10 +136,10 @@ class UUMSequenceHelper :  public UBlueprintFunctionLibrary
 	static void AddGroup(UUMJointGroup *JointGroup, UUMJointGroup *Group);
 	
 	UFUNCTION(Category = "Animation|Joint|Group", meta=(BlueprintThreadSafe))
-	static void AddJoints(UUMJointGroup *JointGroup, TArray<FUMJoint>& JointsIn);
+	static void AddJoints(UUMJointGroup *JointGroup, TArray<UUMJoint*>& JointsIn);
 
 	UFUNCTION(Category = "Animation|Joint|Group", meta=(BlueprintThreadSafe))
-	static void AddJoint(UUMJointGroup *JointGroup, const FUMJoint& Joint);
+	static void AddJoint(UUMJointGroup *JointGroup, UUMJoint* Joint);
 
 	UFUNCTION(BlueprintPure, Category = "Animation", meta=(BlueprintThreadSafe))
 	static UAnimSequence* BuildSequence(UUMJointGroup *JointGroup, USkeletalMesh* SkeletalMesh);

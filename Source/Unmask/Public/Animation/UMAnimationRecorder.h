@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Joint/UMJointStructs.h"
+#include "Joint/UMJoint.h"
 #include "Templates/Tuple.h"
 #include "UObject/Object.h"
 #include "UMAnimationRecorder.generated.h"
@@ -12,7 +13,8 @@
 /**
  * 
  */
- 
+
+
 
 template<typename... Types>  struct TTuple;
 
@@ -41,7 +43,8 @@ struct FUMJointsAggregate
 	GENERATED_BODY()
 public:
 	FVector JointPosSum;
-	TArray<FUMJoint> JointArray;
+	UPROPERTY()
+	TArray<UUMJoint*> JointArray;
 	UPROPERTY()
 	const USkeletalMeshComponent* SMC;
 public:
@@ -49,7 +52,7 @@ public:
 	{
 		UE_LOG(LogScript, Error, TEXT("[JointAggregate] Made with default constructor"))
 	};
-	FUMJointsAggregate(const USkeletalMeshComponent *SkeletalMeshComponent, const TArray<FUMJoint> &Joints)
+	FUMJointsAggregate(const USkeletalMeshComponent *SkeletalMeshComponent, const TArray<UUMJoint*>& Joints)
 	{
 		SMC = SkeletalMeshComponent;
 		JointArray = Joints;
@@ -60,7 +63,7 @@ public:
 		JointPosSum = FVector::ZeroVector;
 		for (auto Joint : JointArray)
 		{
-			JointPosSum += SMC->GetBoneTransform(Joint.Name, RTS_World).GetTranslation();
+			JointPosSum += SMC->GetBoneTransform(Joint->Name, RTS_World).GetTranslation();
 		}
 	}
 };
@@ -87,6 +90,9 @@ protected:
 	
 	UPROPERTY()
 	TMap<FName, UUMJointGroup*> AllGroups;
+
+	UPROPERTY()
+	TMap<FName, UUMJoint*> AllJoints;
 
 	UPROPERTY()
 	TMap<FName, FUMJointsAggregate> AllJointAggregates;
@@ -131,26 +137,38 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void InitAnimationRecorder(USkeletalMeshComponent* InSkeletalMeshComponent, TMap<FName, FRotatorRange> InControlRanges);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	TMap<FName, UUMJointGroup*> GetAllGroups() { return AllGroups; }
-	
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	UUMJointGroup* GetGroupWithBone(FName Bone);
-
-	UFUNCTION(BlueprintCallable)
-	void SelectGroupByName(FName Name, bool bForce);
 	
 	UFUNCTION(BlueprintCallable)
-	void SelectGroup(UUMJointGroup* Group, bool bForce);
+	void GeneratePoseData();
+
+	UFUNCTION(BlueprintCallable)
+	void LoadTimelines(TMap<FName, FUMJointTimeline> Timelines);
 	
 	FString AllGroupsToString();
 	
 	UFUNCTION(BlueprintCallable)
 	void PrintAllGroups();
 	
+
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TMap<FName, UUMJointGroup*> GetAllGroups() { return AllGroups; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TMap<FName, UUMJoint*> GetAllJoints() { return AllJoints; }
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UUMJointGroup* GetGroupByBone(FName Bone);
+
 	UFUNCTION(BlueprintCallable)
-	void LoadTimelines(TMap<FName, FUMJointTimeline> Timelines);
+	bool SelectGroupByName(FName Name, bool bForce);
+	
+	UFUNCTION(BlueprintCallable)
+	void SelectGroup(UUMJointGroup* Group, bool bForce);
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateControlValue(UPARAM(ref) TArray<FUMControlTransform>& PoseDataRef, int Index, FUMControlTransform NewControlTransform);
+	
 	
 	UFUNCTION(BluePrintCallable, BlueprintGetter)
 	UUMJointGroup* GetRootGroup() { return this->RootGroup; }
@@ -170,11 +188,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FRotatorRange GetControlRange(FName Name);
 
-	UFUNCTION(BlueprintCallable)
-	void UpdateControlValue(UPARAM(ref) TArray<FUMControlTransform>& PoseDataRef, int Index, FUMControlTransform NewControlTransform);
-	
-	UFUNCTION(BlueprintCallable)
-	void GeneratePoseData();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)	
 	TMap<FName, FVector> GetJointPositions();
@@ -182,4 +195,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)	
 	TMap<FName, FVector> GetGroupPositions();
 
+protected:
+	FUMJointsAggregate& CreateJoints(FName GroupName, const TArray<UUMJoint*>& InJoints);
 };
