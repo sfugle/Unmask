@@ -20,10 +20,12 @@ public:
 	TArray<UUMPathLocation*> NextLocations;
 	UUMPathLocation()
 	{
-		this->Location = FVector();
+		this->Location = FVector(0, 0, 0);
 	}
 	UFUNCTION(BlueprintCallable)
 	UUMPathLocation* GetRandomNext();
 	UFUNCTION(BlueprintCallable)
-	FVector GetLocation(double Z);
+	FVector GetRelativeLocation(double Z);
+	UFUNCTION(BlueprintCallable)
+	FVector GetAbsoluteLocation(FVector Center, double Z);
 };
