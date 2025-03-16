@@ -11,7 +11,7 @@ class AUMJointAxis;
 /**
  * Acts as the back face of the axes that the players directly manipulate to change the joint values.
  */
-UCLASS()
+UCLASS(BlueprintType)
 class UNMASK_API UUMJointControl : public UObject
 {
 	GENERATED_BODY()

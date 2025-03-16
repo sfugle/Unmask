@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Animation/UMAnimationRecorder.h"
 #include "Animation/Joint/UMJointStructs.h"
 #include "UMJointGroup.generated.h"
 
@@ -22,6 +23,7 @@ public:
 	int Depth = -1;
 	UPROPERTY(Blueprintable, BlueprintReadWrite)
 	TArray<UUMJointGroup*> Groups;
+	UPROPERTY(Blueprintable, BlueprintReadWrite)
 	TArray<FUMJoint> Joints;
 	TSet<FName> Bones;
 public:
@@ -30,8 +32,9 @@ public:
 	
 	void AddGroups(TArray<UUMJointGroup*>& GroupsIn) { for (const auto& Group : GroupsIn) { AddGroup(Group); }}
 	void AddGroup(UUMJointGroup* Group);
-	void AddJoints(TArray<FUMJoint> JointsIn) { for (auto& Joint : JointsIn) { AddJoint(Joint); } }
-	void AddJoint(FUMJoint& Joint)  { Joints.Add(Joint); }
+	void AddJoints(FUMJointsAggregate &JointsAggregateIn) { for (auto& Joint : JointsAggregateIn.JointArray) { AddJoint(Joint); } }
+	void AddJoints(TArray<FUMJoint>& JointsIn) { for (auto& Joint : JointsIn) { AddJoint(Joint); } }
+	void AddJoint(FUMJoint& Joint)  { Joints.Add(Joint); Joint.Parent = this; }
 	void AddBones(TArray<FName> InBones) { for (auto& Bone : InBones) { AddBone(Bone); }}
 	void AddBone(FName InBone) { Bones.Add(InBone); }
 	

@@ -25,7 +25,8 @@ void UUMJointControl::Setup(FName CtrlName, const FRotatorRange& InRange, /*For 
 		
 		FString AxisName = CtrlName.ToString() + "_Axis_" + FString::FromInt(i) + "_" + FString::FromInt(nameIncr++);
 		
-		FVector Location = SkeletalMeshComponent->GetBoneLocation(SocketName, EBoneSpaces::Type::ComponentSpace) + Range.InitialTransforms[i].GetTranslation();
+		FVector BoneLocation = SkeletalMeshComponent->GetBoneLocation(SocketName, EBoneSpaces::Type::ComponentSpace);
+		FVector Location = BoneLocation + Range.InitialTransforms[i].GetTranslation();
 		FQuat BoneRotation = SkeletalMeshComponent->GetBoneTransform(SocketName, RTS_Component).GetRotation();
 		FVector AxisDirection =
 			i == 0 ?
@@ -34,10 +35,10 @@ void UUMJointControl::Setup(FName CtrlName, const FRotatorRange& InRange, /*For 
 					FVector::RightVector :
 					FVector::UpVector;
 		FRotator Rotation = FRotator(Range.InitialTransforms[i].GetRotation() * AxisDirection.ToOrientationQuat());
-
+		
 		FActorSpawnParameters SpawnInfo;
 		SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		SpawnInfo.Name = FName(AxisName); //MakeUniqueObjectName(this, AUMJointAxis::StaticClass(), );
+		SpawnInfo.Name = MakeUniqueObjectName(this, AUMJointAxis::StaticClass(), FName(AxisName));
 		
 		AxesRefs[i] = SkeletalMeshComponent->GetWorld()->SpawnActor<AUMJointAxis>(Location, Rotation, SpawnInfo);
 		AxesRefs[i]->SetActorScale3D(Range.InitialTransforms[i].GetScale3D());

@@ -25,7 +25,6 @@ void UUMSequenceHelper::AddGroups(UUMJointGroup *JointGroup, const TArray<UUMJoi
 
 void UUMSequenceHelper::AddGroup(UUMJointGroup* JointGroup, UUMJointGroup* Group)
 {
-	// No reserve tricks because they screw up amortized constant time
 	JointGroup->Groups.Add(Group);
 	Group->Parent = JointGroup;
 }

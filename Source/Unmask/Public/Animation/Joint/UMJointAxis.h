@@ -7,7 +7,7 @@
 #include "Engine/StaticMeshActor.h"
 #include "UMJointAxis.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType)
 class UNMASK_API AUMJointAxis : public AStaticMeshActor
 {
 	GENERATED_BODY()
@@ -33,4 +33,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void Setup(UUMJointControl* InParent,
 	           float InMin, float InMax);
+	void SetVisbility(bool Vis);
 };

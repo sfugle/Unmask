@@ -35,6 +35,36 @@ enum EUMAnimEditor_MatSlot
 	HAND_R,
 };
 
+USTRUCT(BlueprintType)
+struct FUMJointsAggregate
+{
+	GENERATED_BODY()
+public:
+	FVector JointPosSum;
+	TArray<FUMJoint> JointArray;
+	UPROPERTY()
+	const USkeletalMeshComponent* SMC;
+public:
+	FUMJointsAggregate() : SMC(nullptr)
+	{
+		UE_LOG(LogScript, Error, TEXT("[JointAggregate] Made with default constructor"))
+	};
+	FUMJointsAggregate(const USkeletalMeshComponent *SkeletalMeshComponent, const TArray<FUMJoint> &Joints)
+	{
+		SMC = SkeletalMeshComponent;
+		JointArray = Joints;
+	}
+
+	void Update()
+	{
+		JointPosSum = FVector::ZeroVector;
+		for (auto Joint : JointArray)
+		{
+			JointPosSum += SMC->GetBoneTransform(Joint.Name, RTS_World).GetTranslation();
+		}
+	}
+};
+
 UCLASS(BlueprintType)
 class UNMASK_API UDA_UMControlRanges : public UDataAsset
 {
@@ -57,18 +87,25 @@ protected:
 	
 	UPROPERTY()
 	TMap<FName, UUMJointGroup*> AllGroups;
+
+	UPROPERTY()
+	TMap<FName, FUMJointsAggregate> AllJointAggregates;
 	
 	UPROPERTY()
 	TArray<UMaterialInstanceDynamic*> DynMatInsts;
 	
 	UPROPERTY()
 	TArray<FName> VisibleGroups;
-	
+
 	UPROPERTY()
-	UUMJointGroup* SelectedGroup;
+	TArray<FName> AdjacentGroups;
+
 
 // Pose Data
 public:
+	UPROPERTY(BlueprintReadOnly)
+	UUMJointGroup* SelectedGroup;
+	
 	UPROPERTY(BlueprintReadOnly)
 	TArray<FUMControlTransform> InitialPoseData;
 	
@@ -100,6 +137,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	UUMJointGroup* GetGroupWithBone(FName Bone);
+
+	UFUNCTION(BlueprintCallable)
+	void SelectGroupByName(FName Name, bool bForce);
 	
 	UFUNCTION(BlueprintCallable)
 	void SelectGroup(UUMJointGroup* Group, bool bForce);
@@ -136,7 +176,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GeneratePoseData();
 
-
-
+	UFUNCTION(BlueprintCallable, BlueprintPure)	
+	TMap<FName, FVector> GetJointPositions();
 	
+	UFUNCTION(BlueprintCallable, BlueprintPure)	
+	TMap<FName, FVector> GetGroupPositions();
+
 };

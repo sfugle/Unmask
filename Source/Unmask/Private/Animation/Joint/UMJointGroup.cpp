@@ -1,5 +1,6 @@
 #include "Animation/Joint/UMJointGroup.h"
 #include "Animation/UMAnimationProducer.h"
+#include "Animation/Joint/UMJointControl.h"
 
 // Store the depth of the joint in its group, then add all of the joints to pose data sorted by their depth. 
 // This ensures that the parent is never applied after the child.
@@ -15,6 +16,7 @@ void UUMJointGroup::AddGroup(UUMJointGroup* Group)
 		Joint.Depth = this->Depth + 1;
 	}
 }
+
 
 FString UUMJointGroup::ToString()
 {

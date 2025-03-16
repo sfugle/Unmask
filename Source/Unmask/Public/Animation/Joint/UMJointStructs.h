@@ -4,6 +4,7 @@
 #include "UMJointStructs.generated.h"
 
 class UUMJointControl;
+class UUMJointGroup;
 
 USTRUCT(Blueprintable, BlueprintType)
 struct FRotatorRange
@@ -62,6 +63,8 @@ public:
 	FUMJoint(FName InName, bool IsFk = false);
 	FUMJoint(FName InName, FName InCtrl, FRotatorRange InRangeLimits, const FUMJointTimeline& InTimeline);
 public:
+	UPROPERTY()
+	UUMJointGroup* Parent = nullptr;
 	UPROPERTY(Blueprintable, BlueprintReadWrite)
 	FName Name;
 	UPROPERTY(Blueprintable, BlueprintReadWrite)
