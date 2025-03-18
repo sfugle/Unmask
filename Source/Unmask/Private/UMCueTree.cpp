@@ -2,6 +2,8 @@
 
 #include "UMCueTree.h"
 
+#include "Animation/Joint/UMJointStructs.h"
+
 float UUMCueTree::RandInRange(float Min, float Max)
 {
 	return FMath::FRand() * (Max - Min) + Min;
