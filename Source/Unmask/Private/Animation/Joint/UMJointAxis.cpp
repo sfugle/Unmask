@@ -2,7 +2,7 @@
 
 
 #include "Animation/Joint/UMJointAxis.h"
-
+#include "Camera/CameraComponent.h"
 
 // Sets default values
 AUMJointAxis::AUMJointAxis() : Parent(nullptr)
@@ -18,7 +18,7 @@ AUMJointAxis::AUMJointAxis() : Parent(nullptr)
 		UE_LOG(LogScript, Error, TEXT("[UMJointAxis] ctor: Missing mesh for Joint Axes"))
 	}
 	this->GetStaticMeshComponent()->SetRenderCustomDepth(true);
-	this->GetStaticMeshComponent()->SetVisibility(false);
+	SetVisibility(false);
 }
 
 // Called when the game starts or when spawned
@@ -26,23 +26,46 @@ void AUMJointAxis::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	
 }
 
 // Called every frame
 void AUMJointAxis::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if(AxisType == Camera && IsValid(CameraRef))
+	{
+		// Ring Mesh is facing on its side, so we need the right/up vector instead;
+		this->SetActorRotation(CameraRef->GetUpVector().Rotation());
+	}
 }
 
-void AUMJointAxis::Setup(UUMJointControl* InParent, float InMin, float InMax)
+void AUMJointAxis::Setup(UUMJointControl* InParent, const EUMJointAxisType InAxisType, float InMin, float InMax, bool bIgnoreMinMax)
 {
 	Parent = InParent;
+	this->AxisType = InAxisType;
+	this->GetStaticMeshComponent()->SetCustomDepthStencilValue(static_cast<int>(InAxisType));
+	if(bIgnoreMinMax)
+	{
+		bUsingMinMax = false;
+		return;
+	}
+	Min = InMax;
+	Max = InMax;
 	
 }
 
-void AUMJointAxis::SetVisbility(bool Vis)
+void AUMJointAxis::SetVisibility(bool Vis)
 {
-	this->GetStaticMeshComponent()->SetVisibility(Vis);
+	this->GetStaticMeshComponent()->SetVisibility(Vis, true);
+	if(Vis)
+	{
+		this->GetStaticMeshComponent()->SetCollisionProfileName("BlockAll", true);
+	}
+	else {
+		this->GetStaticMeshComponent()->SetCollisionProfileName("NoCollision", false);
+	}
+	
 }
 
 

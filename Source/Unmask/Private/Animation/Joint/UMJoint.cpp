@@ -11,6 +11,7 @@ UUMJoint* UUMJoint::Init(FName InName, bool IsFk)
 	Name = InName;
 	ControlName = FName(InName.ToString() + (IsFk ?  "_fk" : "") + "_ctrl");
 	Control = NewObject<UUMJointControl>();
+	Control->Parent = this;
 	return this;
 }
 

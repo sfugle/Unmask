@@ -19,6 +19,8 @@ public:
 	UPROPERTY(Blueprintable, BlueprintReadWrite)
 	FName Name;
 	UPROPERTY(Blueprintable, BlueprintReadWrite)
+	FName TrackName;
+	UPROPERTY(Blueprintable, BlueprintReadWrite)
 	UUMJointGroup* Parent {nullptr};
 	int Depth = -1;
 	UPROPERTY(Blueprintable, BlueprintReadWrite)
@@ -27,8 +29,12 @@ public:
 	TArray<UUMJoint*> Joints;
 	TSet<FName> Bones;
 public:
-	UUMJointGroup() : Name("*") {}
-	UUMJointGroup(const FName InName) : Name(InName) {}
+	UUMJointGroup() : Name("*"), TrackName("Track Name") {}
+	void Setup(const FName InName, const FName InTrackName)
+	{
+		Name = InName;
+		TrackName = InTrackName;
+	}
 	
 	void AddGroups(TArray<UUMJointGroup*>& GroupsIn) { for (const auto& Group : GroupsIn) { AddGroup(Group); }}
 	void AddGroup(UUMJointGroup* Group);

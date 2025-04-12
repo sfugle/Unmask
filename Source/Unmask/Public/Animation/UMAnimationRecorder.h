@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Joint/UMJointStructs.h"
 #include "Joint/UMJoint.h"
+#include "Joint/UMJointAxis.h"
 #include "Templates/Tuple.h"
 #include "UObject/Object.h"
 #include "UMAnimationRecorder.generated.h"
@@ -48,16 +49,17 @@ public:
 	UPROPERTY()
 	const USkeletalMeshComponent* SMC;
 public:
-	FUMJointsAggregate() : SMC(nullptr)
-	{
-		UE_LOG(LogScript, Error, TEXT("[JointAggregate] Made with default constructor"))
-	};
+	FUMJointsAggregate() : SMC(nullptr) {};
 	FUMJointsAggregate(const USkeletalMeshComponent *SkeletalMeshComponent, const TArray<UUMJoint*>& Joints)
 	{
 		SMC = SkeletalMeshComponent;
 		JointArray = Joints;
 	}
-
+	void Setup(const USkeletalMeshComponent *SkeletalMeshComponent, const TArray<UUMJoint*>& Joints)
+	{
+		SMC = SkeletalMeshComponent;
+		JointArray = Joints;
+	}
 	void Update()
 	{
 		JointPosSum = FVector::ZeroVector;
@@ -124,7 +126,7 @@ protected:
 	TArray<FRotatorRange> RotatorRanges;
 
 	UPROPERTY()
-	TMap<FName, int> IndexMap; //maps a control name to its place in the above array
+	TMap<FName, int> IndexMap; //maps a joint name to its place in the above array
 	
 	bool bGenerated;
 	
@@ -140,6 +142,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void GeneratePoseData();
+	void UpdatePose();
 
 	UFUNCTION(BlueprintCallable)
 	void LoadTimelines(TMap<FName, FUMJointTimeline> Timelines);
@@ -168,7 +171,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateControlValue(UPARAM(ref) TArray<FUMControlTransform>& PoseDataRef, int Index, FUMControlTransform NewControlTransform);
-	
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateControlAxis(UPARAM(ref) TArray<FUMControlTransform>& PoseDataRef, UPARAM(ref) UUMJointControl *JointControl, TEnumAsByte<EUMJointAxisType> Axis, float DeltaChange);
 	
 	UFUNCTION(BluePrintCallable, BlueprintGetter)
 	UUMJointGroup* GetRootGroup() { return this->RootGroup; }
