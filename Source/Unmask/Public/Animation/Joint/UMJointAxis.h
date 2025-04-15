@@ -40,6 +40,8 @@ protected:
 	UPROPERTY()
 	bool bUsingMinMax = true;
 	FTransform InitialTransform;
+	UPROPERTY()
+	bool bIsSelected;
 public:
 	// Sets default values for this actor's properties
 	AUMJointAxis();
@@ -53,6 +55,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void Setup(UUMJointControl* InParent, EUMJointAxisType AxisTypeIn,
 	           float InMin, float InMax, bool bIgnoreMinMax = false);
+	UFUNCTION(BlueprintCallable)
+	void Select();
+	UFUNCTION(BlueprintCallable)
+	void Deselect();
 	UFUNCTION(BlueprintCallable)
 	void SetVisibility(bool Vis);
 	UFUNCTION(BlueprintCallable, BlueprintPure)

@@ -118,6 +118,11 @@ bool UUMJointControl::Bind(UCameraComponent *Camera)
 	}
 }
 
+void UUMJointControl::DeselectAxis(const EUMJointAxisType AxisType) const
+{
+	GetAxis(AxisType)->Deselect();
+}
+
 void UUMJointControl::Unbind()
 {
 	if(!bIsValid) { return; }

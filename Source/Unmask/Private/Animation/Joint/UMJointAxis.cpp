@@ -55,9 +55,22 @@ void AUMJointAxis::Setup(UUMJointControl* InParent, const EUMJointAxisType InAxi
 	
 }
 
+void AUMJointAxis::Select()
+{
+	bIsSelected = true;
+	GetStaticMeshComponent()->SetCustomDepthStencilValue(AxisType + 10);
+}
+
+void AUMJointAxis::Deselect()
+{
+	bIsSelected = false;
+	GetStaticMeshComponent()->SetCustomDepthStencilValue(AxisType);
+}
+
 void AUMJointAxis::SetVisibility(bool Vis)
 {
 	this->GetStaticMeshComponent()->SetVisibility(Vis, true);
+	Deselect();
 	if(Vis)
 	{
 		this->GetStaticMeshComponent()->SetCollisionProfileName("BlockAll", true);

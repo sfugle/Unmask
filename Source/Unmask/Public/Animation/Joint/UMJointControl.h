@@ -60,6 +60,9 @@ public:
 	Bind(UCameraComponent *Camera);
 
 	UFUNCTION(BlueprintCallable)
+	void DeselectAxis(EUMJointAxisType AxisType) const;
+
+	UFUNCTION(BlueprintCallable)
 	void Unbind();
 
 	UFUNCTION(BlueprintCallable)
@@ -68,6 +71,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	AUMJointAxis* GetAxis(const EUMJointAxisType Axis) const
 	{
+		if (Axis != X && Axis != Y && Axis != Z) { return nullptr; }
 		return AxesRefs[Axis-1];
 	}
 protected:
